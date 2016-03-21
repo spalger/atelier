@@ -8,6 +8,9 @@ import { babelPreset, AbstractCommand } from '../lib'
 export class BuildCommand extends AbstractCommand {
   static cmd = 'build'
   static description = 'Build your application'
+  static options = [
+    ['-w, --watch', 'Watch for changes and automatically rebuild.'],
+  ]
 
   init() {
     const { config } = this
@@ -61,10 +64,30 @@ export class BuildCommand extends AbstractCommand {
   }
 
   async run() {
-    const { log } = this
+    const { log, options } = this
     log.status('building...')
 
-    const stats = await fbc(cb => webpack(this.config, cb))
+    const compiler = webpack(this.config)
+
+    if (options.watch) {
+      await fbc(cb => {
+        compiler.watch({}, (err, stats) => {
+          if (err) {
+            compiler.close()
+            cb(err)
+          } else {
+            this.reportStats(stats)
+          }
+        })
+      })
+    } else {
+      const stats = await fbc(cb => compiler.run(cb))
+      this.reportStats(stats)
+    }
+  }
+
+  reportStats(stats) {
+    const { log } = this
     const { compilation: { errors, warnings } } = stats
 
     const output = stats.toString(true)
