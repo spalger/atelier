@@ -71,6 +71,7 @@
     "lodash": "^4.6.1",
     "minimatch": "^3.0.0",
     "raw-loader": "^0.5.1",
+    "rimraf": "^2.5.2",
     "source-map-support": "^0.4.0",
     "webpack": "^1.12.14"
   },

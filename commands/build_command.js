@@ -1,14 +1,16 @@
 import { resolve } from 'path'
 import webpack, { BannerPlugin } from 'webpack'
 import { keys, union } from 'lodash'
+import rimraf from 'rimraf'
 
-import { AbstractCommand, babelPreset, fcb } from '../lib'
+import { AbstractCommand, babelPreset, fcb, makeExecutable, onUnhandledError } from '../lib'
 
 export class BuildCommand extends AbstractCommand {
   static cmd = 'build'
   static description = 'Build your application'
   static options = [
     ['-w, --watch', 'Watch for changes and automatically rebuild.'],
+    ['-c, --clean', 'Clear out the dist before building.'],
   ]
 
   init() {
@@ -30,7 +32,7 @@ export class BuildCommand extends AbstractCommand {
       }))
     }
 
-    this.config = {
+    this.webpackConfig = {
       target: target === 'web' ? 'web' : 'node',
       entry: `./${entryFile}`,
       output: {
@@ -40,7 +42,7 @@ export class BuildCommand extends AbstractCommand {
         umdNamedDefine: name,
       },
       externals,
-      devtool: 'source-map',
+      devtool: 'inline-source-map',
       devtoolModuleFilenameTemplate: '[resource-path]',
       module: {
         loaders: [
@@ -63,10 +65,14 @@ export class BuildCommand extends AbstractCommand {
   }
 
   async run() {
-    const { log, options } = this
+    const { config, log, options } = this
     log.status('building...')
 
-    const compiler = webpack(this.config)
+    const compiler = webpack(this.webpackConfig)
+
+    if (options.clean) {
+      await fcb(cb => rimraf(`${config.get('dist')}/*`, cb))
+    }
 
     if (options.watch) {
       await fcb(cb => {
@@ -75,19 +81,27 @@ export class BuildCommand extends AbstractCommand {
             compiler.close()
             cb(err)
           } else {
-            this.reportStats(stats)
+            this.afterCompile(stats).catch(onUnhandledError())
           }
         })
       })
     } else {
       const stats = await fcb(cb => compiler.run(cb))
-      this.reportStats(stats)
+      await this.afterCompile(stats)
     }
   }
 
-  reportStats(stats) {
-    const { log } = this
-    const { compilation: { errors, warnings } } = stats
+  async afterCompile(stats) {
+    const { config, log } = this
+    const { compilation: { errors, warnings, chunks } } = stats
+
+    if (config.get('target') === 'executable') {
+      for (const chunk of chunks) {
+        for (const file of chunk.files) {
+          await makeExecutable(resolve(this.webpackConfig.output.path, file))
+        }
+      }
+    }
 
     const output = stats.toString(true)
     output.split('\n').forEach(line => {
