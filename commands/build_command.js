@@ -3,8 +3,7 @@ import webpack, { BannerPlugin } from 'webpack'
 import { keys, union } from 'lodash'
 import { fromCallback as fbc } from 'bluebird'
 
-import babelPreset from './babel_preset'
-import { AbstractCommand } from '../lib'
+import { babelPreset, AbstractCommand } from '../lib'
 
 export class BuildCommand extends AbstractCommand {
   static cmd = 'build'
@@ -35,7 +34,7 @@ export class BuildCommand extends AbstractCommand {
       output: {
         path: dist,
         filename: entryFile,
-        libraryTarget: 'umd',
+        libraryTarget: target === 'web' ? 'umd' : 'commonjs',
         umdNamedDefine: name,
       },
       externals,

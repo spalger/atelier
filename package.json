@@ -23,7 +23,7 @@
   "atelier": {
     "target": "executable",
     "noTransformJs": [
-      "./commands/babel_preset.js"
+      "./lib/babel_preset.js"
     ]
   },
   "homepage": "https://github.com/spalger/atelier#readme",
