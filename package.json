@@ -6,7 +6,7 @@
   "bin": "dist/atelier.js",
   "files": [
     "dist",
-    "eslint-config.js"
+    "eslint_config.js"
   ],
   "scripts": {
     "prepublish": "node ./dist/atelier build"

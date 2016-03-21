@@ -55,7 +55,7 @@ export class InitCommand extends AbstractCommand {
 
     this.log.status('creating .eslintrc file')
     await write(join(projectRoot, '.eslintrc'), {
-      extends: './node_modules/atelier/eslint-config.js',
+      extends: './node_modules/atelier/eslint_config.js',
     })
 
     this.log.status('updating package.json')
