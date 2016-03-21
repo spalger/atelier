@@ -1,6 +1,6 @@
 {
   "name": "atelier",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "build tool to simplifying your life",
   "main": "dist/atelier.js",
   "bin": "dist/atelier.js",
