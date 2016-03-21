@@ -98,7 +98,7 @@ export class BuildCommand extends AbstractCommand {
     const errs = errors.length
     const fail = warns || errs
 
-    log[errs || warns ? 'error' : 'status'](log.trim(`
+    log[errs || warns ? 'error' : 'status'](log.flatten(`
       build ${fail ? 'failed' : 'complete'}
       ${warns ? ` with ${warns} warning${warns === 1 ? '' : 's'}` : ''}
       ${errs ? ` ${warns ? 'and' : 'with'} ${errs} error${errs === 1 ? '' : 's'}` : ''}

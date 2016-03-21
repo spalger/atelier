@@ -1,7 +1,7 @@
 module.exports = {
   parser: 'babel-eslint',
-  extends: '@spalger/personal/es6',
+  extends: require.resolve('@spalger/eslint-config-personal/es6'),
   rules: {
-    eqeqeq: [2, 'allow-null']
+    eqeqeq: [2, 'allow-null'],
   },
 }

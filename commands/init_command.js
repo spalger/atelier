@@ -12,15 +12,12 @@ async function ask(prompts) {
   })
 }
 
-async function npm(cwd, args) {
-  await fcb(cb => execFile('npm', args, { cwd }, (err, stdout, stderr) =>
-    cb(err, [stdout, stderr])
-  ))
-}
-
 export class InitCommand extends AbstractCommand {
   static cmd = 'init <project name>'
   static description = 'Initialize atelier in your app'
+  static options = [
+    ['--link', 'Link atelier rather than install it from npm (for dev)'],
+  ]
   static initConfig = false
 
   init() {}
@@ -52,27 +49,48 @@ export class InitCommand extends AbstractCommand {
     ])
 
     this.log.status(`initializing ${projectName} at ${projectRoot}`)
-    await fcb(cb => mkdir(projectRoot, cb))
+    await mkdir(projectRoot)
     await write(join(projectRoot, `${projectName}.js`), 'console.log(\'hello world\')')
-    await npm(projectRoot, ['init', '-y'])
+    await npm(['init', '-y'])
 
     this.log.status('creating .eslintrc file')
-    await write(join(projectRoot, '.eslintrc'), json({
+    await write(join(projectRoot, '.eslintrc'), {
       extends: './node_modules/atelier/eslint-config.js',
-    }))
+    })
 
     this.log.status('updating package.json')
     const newPkg = JSON.parse(await read(newPkgPath))
 
     newPkg.main = `dist/${projectName}.js`
     newPkg.atelier = { target }
+    newPkg.scripts = {
+      ...newPkg.scripts,
+      build: 'atelier build',
+      dev: 'atelier build --watch',
+      lint: 'atelier lint',
+    }
     newPkg.devDependencies = {
       atelier: `^${pkg.version}`,
+      'babel-eslint': pkg.devDependencies['babel-eslint'],
+      eslint: pkg.devDependencies.eslint,
+      'eslint-plugin-react': pkg.devDependencies['eslint-plugin-react'],
     }
 
-    await write(newPkgPath, json(newPkg, null, '  '))
+    await write(newPkgPath, newPkg)
 
-    this.log.status('installing npm dependencies')
-    await npm(projectRoot, ['install'])
+    await this.log.status('installing npm dependencies', async () => {
+      if (this.options.link) {
+        await npm(['link', '../atelier'], true)
+      } else {
+        await npm(['install'], true)
+      }
+    })
+
+    this.log.writeln(this.log.unindent(`
+      Init is complete, now move into ${projectName} and GET TO WORK
+
+        cd ${JSON.stringify(projectName)}
+    `))
+    this.log.writeln()
   }
 }
