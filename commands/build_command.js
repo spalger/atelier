@@ -1,5 +1,5 @@
 import { resolve } from 'path'
-import webpack from 'webpack'
+import webpack, { BannerPlugin } from 'webpack'
 import { keys, union } from 'lodash'
 import { fromCallback as fbc } from 'bluebird'
 
@@ -21,13 +21,21 @@ export class BuildCommand extends AbstractCommand {
     const pkg = config.getPackage()
     const externals = union(keys(pkg.dependencies), keys(pkg.devDependencies))
 
+    const plugins = []
+    if (target === 'executable') {
+      plugins.push(new BannerPlugin('#!/usr/bin/env node', {
+        raw: true,
+        entryOnly: true,
+      }))
+    }
+
     this.config = {
-      target,
+      target: target === 'web' ? 'web' : 'node',
       entry: `./${entryFile}`,
       output: {
         path: dist,
         filename: entryFile,
-        libraryTarget: target === 'node' ? 'commonjs' : 'umd',
+        libraryTarget: 'umd',
         umdNamedDefine: name,
       },
       externals,
@@ -49,6 +57,7 @@ export class BuildCommand extends AbstractCommand {
         ],
         noParse: config.get('noTransformJs'),
       },
+      plugins,
     }
   }
 

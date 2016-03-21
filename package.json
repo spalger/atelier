@@ -21,7 +21,7 @@
     "url": "https://github.com/spalger/atelier/issues"
   },
   "atelier": {
-    "target": "node",
+    "target": "executable",
     "noTransformJs": [
       "./commands/babel_preset.js"
     ]
