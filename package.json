@@ -1,10 +1,12 @@
 {
   "name": "atelier",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "build tool to simplifying your life",
   "main": "dist/atelier.js",
   "bin": "dist/atelier.js",
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "prepublish": "node ./dist/atelier build"
   },
