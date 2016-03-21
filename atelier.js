@@ -21,13 +21,16 @@ async function main() {
     }
   }
 
-  program.parse(process.argv)
+  const commandName = process.argv[2]
+  if (!commandName) program.help()
 
-  const command = program.args[0]
-  if (!command) program.help()
-  if (!(command instanceof program.Command)) {
-    program.help((output) => `\n  unknown command: ${yellow(JSON.stringify(command))}\n${output}`)
+  if (!program.commands.some(c => c._name === commandName)) {
+    program.help((output) =>
+      `\n  unknown command: ${yellow(JSON.stringify(commandName))}\n${output}`
+    )
   }
+
+  program.parse(process.argv)
 }
 
 main().catch(onUnhandledError())
