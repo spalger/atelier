@@ -1,9 +1,8 @@
 import { resolve } from 'path'
 import webpack, { BannerPlugin } from 'webpack'
 import { keys, union } from 'lodash'
-import { fromCallback as fbc } from 'bluebird'
 
-import { babelPreset, AbstractCommand } from '../lib'
+import { AbstractCommand, babelPreset, fcb } from '../lib'
 
 export class BuildCommand extends AbstractCommand {
   static cmd = 'build'
@@ -70,7 +69,7 @@ export class BuildCommand extends AbstractCommand {
     const compiler = webpack(this.config)
 
     if (options.watch) {
-      await fbc(cb => {
+      await fcb(cb => {
         compiler.watch({}, (err, stats) => {
           if (err) {
             compiler.close()
@@ -81,7 +80,7 @@ export class BuildCommand extends AbstractCommand {
         })
       })
     } else {
-      const stats = await fbc(cb => compiler.run(cb))
+      const stats = await fcb(cb => compiler.run(cb))
       this.reportStats(stats)
     }
   }

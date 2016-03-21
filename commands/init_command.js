@@ -1,23 +1,8 @@
-import { fromCallback as fcb } from 'bluebird'
-import { readFile, writeFile, mkdir } from 'fs'
-import { execFile } from 'child_process'
 import { join } from 'path'
 import inquirer from 'inquirer'
 import pkg from '../package.json'
 
-import { AbstractCommand } from '../lib'
-
-async function read(path) {
-  return await fcb(cb => readFile(path, 'utf8', cb))
-}
-
-async function write(path, contents) {
-  return await fcb(cb => writeFile(path, contents, 'utf8', cb))
-}
-
-function json(obj) {
-  return JSON.stringify(obj, null, '  ')
-}
+import { fcb, read, write, mkdir, exec, AbstractCommand } from '../lib'
 
 async function ask(prompts) {
   return await fcb(cb => {
@@ -45,6 +30,13 @@ export class InitCommand extends AbstractCommand {
 
     const projectRoot = join(process.cwd(), projectName)
     const newPkgPath = join(projectRoot, 'package.json')
+
+    const npm = async (args, interesting) => {
+      const cmd = 'npm'
+      const cwd = projectRoot
+      const stdio = interesting ? 'inherit' : ['ignore', 'ignore', 'inherit']
+      await exec({ cmd, args, cwd, stdio })
+    }
 
     const { target } = await ask([
       {
