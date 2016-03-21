@@ -1,0 +1,7 @@
+module.exports = {
+  parser: 'babel-eslint',
+  extends: '@spalger/personal/es6',
+  rules: {
+    eqeqeq: [2, 'allow-null']
+  },
+}
