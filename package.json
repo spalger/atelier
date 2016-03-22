@@ -79,5 +79,8 @@
     "babel-eslint": "^6.x || ^6.0.0-beta",
     "eslint": "^2.4.0",
     "eslint-plugin-react": "^4.2.3"
+  },
+  "engines": {
+    "node": "4.x || 5.x"
   }
 }
